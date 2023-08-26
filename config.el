@@ -1,5 +1,6 @@
 (setq scroll-margin 10)
 (setq display-line-numbers-type 'relative)
+(setq inhibit-x-resources t)
 (pixel-scroll-mode)
 
 ;; Make it so scroll margin is unset in popup buffers
@@ -14,10 +15,18 @@
 
 (map! :leader :desc "Calculator" "oc" #'calc)
 
-(setq doom-theme 'modus-vivendi)
+(setq doom-theme 'doom-gruvbox)
 
-(set-frame-parameter nil 'alpha-background 70)
-(add-to-list 'default-frame-alist '(alpha-background . 70))
+(set-frame-parameter nil 'alpha-background 80)
+(add-to-list 'default-frame-alist '(alpha-background . 80))
+
+;; Shows the battery in modeline
+(display-battery-mode)
+;; (use-package! doom-modeline
+;;   :custom
+;;   (setq doom-modeline-battery t)
+;;   ;; (setq doom-modeline-mu4e nil)
+;;   )
 
 (use-package! projectile
   :init
@@ -35,20 +44,21 @@
   :config
   (setq org-link-abbrev-alist
         '(("spellwiki" . "http://dnd5e.wikidot.com/spell:")))
-  (setq org-startup-folded t))
-
-(use-package! org-roam
-  :after org
-  :commands (org-roam-node-insert org-roam-node-find org-roam-capture)
-  :config
-  (setq org-roam-directory (file-truename "~/org-roam"))
-  (org-roam-db-autosync-mode)
+  (setq org-startup-folded t)
   )
 
-(map! :leader :prefix "r"
-     :desc "Node Insert" "i" #'org-roam-node-insert
-     :desc "Node Find" "f" #'org-roam-node-find
-     :desc "Node Capture" "c" #'org-roam-capture)
+;; (use-package! org-roam
+;;   :after org
+;;   :commands (org-roam-node-insert org-roam-node-find org-roam-capture)
+;;   :config
+;;   (setq org-roam-directory (file-truename "~/org-roam"))
+;;   (org-roam-db-autosync-mode)
+;;   )
+
+;; (map! :leader :prefix "r"
+;;      :desc "Node Insert" "i" #'org-roam-node-insert
+;;      :desc "Node Find" "f" #'org-roam-node-find
+;;      :desc "Node Capture" "c" #'org-roam-capture)
 
 (use-package! all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
@@ -73,12 +83,16 @@
   (setq mu4e-use-maildirs-extension nil)
 
   ;; Referesh mail using isync every 10 minutes
-  (setq mu4e-update-interval (* 10 60))
-  (setq mu4e-get-mail-command "mbsync -a")
-  (setq mu4e-maildir "~/Mail")
+  ;; (setq mu4e-update-interval (* 10 60))
+  (setq mu4e-get-mail-command "mailsync")
+  (setq mu4e-maildir "~/.local/share/mail")
 
-  ;; Configure the function to be used for sending mail
-  (setq message-send-mail-function 'smtpmail-send-it)
+  ;; Configure mail sending to use msmtp
+  (setq sendmail-program (executable-find "msmtp")
+        send-mail-function #'smtpmail-send-it
+        message-sendmail-f-is-evil t
+        message-sendmail-extra-arguments '("--read-envelope-from")
+        message-send-mail-function #'message-send-mail-with-sendmail)
 
   (setq mu4e-contexts
         (list
@@ -88,22 +102,22 @@
           :match-func
           (lambda (msg)
             (when msg
-              (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
+              (string-prefix-p "/georgenpadron@gmail.com" (mu4e-message-field msg :maildir))))
           :vars '((user-mail-address . "georgenpadron@gmail.com")
                   (user-full-name . "George N Padron")
-                  (smtpmail-smtp-server . "smtp.gmail.com")
-                  (smtpmail-smtp-service . 465)
-                  (smtpmail-stream-type . ssl)
-                  (mu4e-drafts-folder . "/Gmail/[Gmail]/Drafts")
-                  (mu4e-sent-folder . "/Gmail/[Gmail]/Sent Mail")
-                  (mu4e-refile-folder . "/Gmail/[Gmail]/All Mail")
-                  (mu4e-trash-folder . "/Gmail/[Gmail]/Trash")
+                  ;; (smtpmail-smtp-server . "smtp.gmail.com")
+                  ;; (smtpmail-smtp-service . 465)
+                  ;; (smtpmail-stream-type . ssl)
+                  (mu4e-drafts-folder . "/georgenpadron@gmail.com/[Gmail]/Drafts")
+                  (mu4e-sent-folder . "/georgenpadron@gmail.com/[Gmail]/Sent")
+                  (mu4e-refile-folder . "/georgenpadron@gmail.com/[Gmail]/All Mail")
+                  (mu4e-trash-folder . "/georgenpadron@gmail.com/[Gmail]/Trash")
                   (mu4e-maildir-shortcuts .
-                                          (("/Gmail/Inbox" . ?i)
-                                           ("/Gmail/[Gmail]/Sent Mail" . ?s)
-                                           ("/Gmail/[Gmail]/Trash" . ?t)
-                                           ("/Gmail/[Gmail]/Drafts" . ?d)
-                                           ("/Gmail/[Gmail]/All Mail" . ?a)))
+                                          (("/georgenpadron@gmail.com/INBOX" . ?i)
+                                           ("/georgenpadron@gmail.com/[Gmail]/Sent Mail" . ?s)
+                                           ("/georgenpadron@gmail.com/[Gmail]/Trash" . ?t)
+                                           ("/georgenpadron@gmail.com/[Gmail]/Drafts" . ?d)
+                                           ("/georgenpadron@gmail.com/[Gmail]/All Mail" . ?a)))
                   ))
 
          ;; Wealth Account
@@ -112,45 +126,45 @@
           :match-func
           (lambda (msg)
             (when msg
-              (string-prefix-p "/Wealth" (mu4e-message-field msg :maildir))))
+              (string-prefix-p "/wealth2005@gmail.com" (mu4e-message-field msg :maildir))))
           :vars '((user-mail-address . "wealth2005@gmail.com")
                   (user-full-name . "George N Padron")
-                  (smtpmail-smtp-server . "smtp.gmail.com")
-                  (smtpmail-smtp-service . 465)
-                  (smtpmail-stream-type . ssl)
-                  (mu4e-drafts-folder . "/Wealth/[Gmail]/Drafts")
-                  (mu4e-sent-folder . "/Wealth/[Gmail]/Sent Mail")
-                  (mu4e-refile-folder . "/Wealth/[Gmail]/All Mail")
-                  (mu4e-trash-folder . "/Wealth/[Gmail]/Trash")
+                  ;; (smtpmail-smtp-server . "smtp.gmail.com")
+                  ;; (smtpmail-smtp-service . 465)
+                  ;; (smtpmail-stream-type . ssl)
+                  (mu4e-drafts-folder . "/wealth2005@gmail.com/[Gmail]/Drafts")
+                  (mu4e-sent-folder . "/wealth2005@gmail.com/[Gmail]/Sent Mail")
+                  (mu4e-refile-folder . "/wealth2005@gmail.com/[Gmail]/All Mail")
+                  (mu4e-trash-folder . "/wealth2005@gmail.com/[Gmail]/Trash")
                   (mu4e-maildir-shortcuts .
-                                          (("/Wealth/Inbox" . ?i)
-                                           ("/Wealth/[Gmail]/Sent Mail" . ?s)
-                                           ("/Wealth/[Gmail]/Trash" . ?t)
-                                           ("/Wealth/[Gmail]/Drafts" . ?d)
-                                           ("/Wealth/[Gmail]/All Mail" . ?a)))
+                                          (("/wealth2005@gmail.com/INBOX" . ?i)
+                                           ("/wealth2005@gmail.com/[Gmail]/Sent Mail" . ?s)
+                                           ("/wealth2005@gmail.com/[Gmail]/Trash" . ?t)
+                                           ("/wealth2005@gmail.com/[Gmail]/Drafts" . ?d)
+                                           ("/wealth2005@gmail.com/[Gmail]/All Mail" . ?a)))
                   ))
-         ;; Vanderbilt Account
+         ;; george.n.padron@vanderbilt.edu Account
          (make-mu4e-context
           :name "Vanderbilt"
           :match-func
           (lambda (msg)
             (when msg
-              (string-prefix-p "/Vanderbilt" (mu4e-message-field msg :maildir))))
+              (string-prefix-p "/george.n.padron@vanderbilt.edu" (mu4e-message-field msg :maildir))))
           :vars '((user-mail-address . "george.n.padron@vanderbilt.edu")
                   (user-full-name . "George N Padron")
                   (smtpmail-smtp-server . "smtp.gmail.com")
                   (smtpmail-smtp-service . 465)
                   (smtpmail-stream-type . ssl)
-                  (mu4e-drafts-folder . "/Vanderbilt/[Gmail]/Drafts")
-                  (mu4e-sent-folder . "/Vanderbilt/[Gmail]/Sent Mail")
-                  (mu4e-refile-folder . "/Vanderbilt/[Gmail]/All Mail")
-                  (mu4e-trash-folder . "/Vanderbilt/[Gmail]/Trash")
+                  (mu4e-drafts-folder . "/george.n.padron@vanderbilt.edu/[Gmail]/Drafts")
+                  (mu4e-sent-folder . "/george.n.padron@vanderbilt.edu/[Gmail]/Sent Mail")
+                  (mu4e-refile-folder . "/george.n.padron@vanderbilt.edu/[Gmail]/All Mail")
+                  (mu4e-trash-folder . "/george.n.padron@vanderbilt.edu/[Gmail]/Trash")
                   (mu4e-maildir-shortcuts .
-                                          (("/Vanderbilt/Inbox" . ?i)
-                                           ("/Vanderbilt/[Gmail]/Sent Mail" . ?s)
-                                           ("/Vanderbilt/[Gmail]/Trash" . ?t)
-                                           ("/Vanderbilt/[Gmail]/Drafts" . ?d)
-                                           ("/Vanderbilt/[Gmail]/All Mail" . ?a)))
+                                          (("/george.n.padron@vanderbilt.edu/INBOX" . ?i)
+                                           ("/george.n.padron@vanderbilt.edu/[Gmail]/Sent Mail" . ?s)
+                                           ("/george.n.padron@vanderbilt.edu/[Gmail]/Trash" . ?t)
+                                           ("/george.n.padron@vanderbilt.edu/[Gmail]/Drafts" . ?d)
+                                           ("/george.n.padron@vanderbilt.edu/[Gmail]/All Mail" . ?a)))
                   ))
          ))
   )

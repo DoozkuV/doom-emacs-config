@@ -9,7 +9,7 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
 (package! smudge)
-(package! org-roam)
+;; (package! org-roam)
 (package! all-the-icons-dired)
 
 ;; To install a package directly from a remote git repo, you must specify a
@@ -52,6 +52,3 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-;; This is necesseary to fix a bug with doom's version of evil-collection
-(unpin! evil-collection)
-;; (package! smartparens :disable t)
