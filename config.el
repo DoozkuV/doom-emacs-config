@@ -11,8 +11,6 @@
 (map! :i "C-h" #'left-char)
 (map! :i "C-l" #'right-char)
 
-(evil-collection-init 'mu4e)
-
 (map! :leader :desc "Calculator" "oc" #'calc)
 
 (setq doom-theme 'doom-gruvbox)
@@ -21,7 +19,7 @@
 (add-to-list 'default-frame-alist '(alpha-background . 80))
 
 ;; Shows the battery in modeline
-(display-battery-mode)
+;; (display-battery-mode)
 ;; (use-package! doom-modeline
 ;;   :custom
 ;;   (setq doom-modeline-battery t)
@@ -31,7 +29,8 @@
 (use-package! projectile
   :init
   (when (file-directory-p "~/Projects")
-    (setq projectile-project-search-path '("~/Projects"))))
+    (setq projectile-project-search-path '(("~/Projects")
+                                           ("~/Documents")))))
 
 (set-popup-rules!
   '(("\*godot - .+\*")
@@ -40,28 +39,15 @@
     ("\*Async Shell Command\*")
     ))
 
-(use-package! org
-  :config
+(after! org
+  ;; Set up some abbreviations for org-mode links
   (setq org-link-abbrev-alist
         '(("spellwiki" . "http://dnd5e.wikidot.com/spell:")))
   (setq org-startup-folded t)
-  )
 
-;; (use-package! org-roam
-;;   :after org
-;;   :commands (org-roam-node-insert org-roam-node-find org-roam-capture)
-;;   :config
-;;   (setq org-roam-directory (file-truename "~/org-roam"))
-;;   (org-roam-db-autosync-mode)
-;;   )
-
-;; (map! :leader :prefix "r"
-;;      :desc "Node Insert" "i" #'org-roam-node-insert
-;;      :desc "Node Find" "f" #'org-roam-node-find
-;;      :desc "Node Capture" "c" #'org-roam-capture)
-
-(use-package! all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
+  (setq org-directory "~/Documents/org")
+  ;; Org Roam config
+  (setq org-roam-directory "~/Documents/org/roam/"))
 
 (use-package! which-key
   :config
@@ -83,7 +69,7 @@
   (setq mu4e-use-maildirs-extension nil)
 
   ;; Referesh mail using isync every 10 minutes
-  ;; (setq mu4e-update-interval (* 10 60))
+  (setq mu4e-update-interval (* 10 60))
   (setq mu4e-get-mail-command "mailsync")
   (setq mu4e-maildir "~/.local/share/mail")
 
@@ -172,7 +158,7 @@
 (defun yay-update ()
     "Run the Yay shell command to automatically update the system on arch"
     (interactive)
-    (with-editor-async-shell-command "yay -Syu"))
+    (async-shell-command "yay -Syu"))
 
 (map! :leader :desc "Update System" "C-u" #'yay-update)
 

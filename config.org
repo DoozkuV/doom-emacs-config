@@ -19,11 +19,6 @@ Some basic utility keybinds to make movement easier while in visual mode
 (map! :i "C-l" #'right-char)
 #+end_src
 
-Some configuration to make mu4e play nice with evil.
-#+begin_src emacs-lisp :tangle yes
-(evil-collection-init 'mu4e)
-#+end_src
-
 Add some bindings to open the Emacs Calc mode.
 #+begin_src emacs-lisp :tangle yes
 (map! :leader :desc "Calculator" "oc" #'calc)
@@ -43,7 +38,7 @@ Set the theme here
 Configuration for the modeline is done here
 #+begin_src emacs-lisp :tangle yes
 ;; Shows the battery in modeline
-(display-battery-mode)
+;; (display-battery-mode)
 ;; (use-package! doom-modeline
 ;;   :custom
 ;;   (setq doom-modeline-battery t)
@@ -57,7 +52,8 @@ Basic configuration for projectile
 (use-package! projectile
   :init
   (when (file-directory-p "~/Projects")
-    (setq projectile-project-search-path '("~/Projects"))))
+    (setq projectile-project-search-path '(("~/Projects")
+                                           ("~/Documents")))))
 #+end_src
 * Popup Windows
 Pop up windows are managed using Doom Emacs' built in 'popup' module. Here is some configuration stolen from my original Emacs config to set certain modes as popup modes
@@ -72,40 +68,17 @@ Pop up windows are managed using Doom Emacs' built in 'popup' module. Here is so
 * Org
 ** Initial Setup
 #+begin_src emacs-lisp :tangle yes
-(use-package! org
-  :config
+(after! org
+  ;; Set up some abbreviations for org-mode links
   (setq org-link-abbrev-alist
         '(("spellwiki" . "http://dnd5e.wikidot.com/spell:")))
   (setq org-startup-folded t)
-  )
-#+end_src
-** Roam
-[[id:60048b23-b4ec-453a-bf7e-45c7ed1b6ba5][Org Roam]] is a powerful tool for creating, organizing, and linking together notes. It is comparable to Obsidian's knowledge bank functionality.
-#+begin_src emacs-lisp :tangle yes
-  ;; (use-package! org-roam
-  ;;   :after org
-  ;;   :commands (org-roam-node-insert org-roam-node-find org-roam-capture)
-  ;;   :config
-  ;;   (setq org-roam-directory (file-truename "~/org-roam"))
-  ;;   (org-roam-db-autosync-mode)
-  ;;   )
-#+end_src
 
-Here are the keybinds for org-roam mode.
-#+begin_src emacs-lisp :tangle yes
-;; (map! :leader :prefix "r"
-;;      :desc "Node Insert" "i" #'org-roam-node-insert
-;;      :desc "Node Find" "f" #'org-roam-node-find
-;;      :desc "Node Capture" "c" #'org-roam-capture)
+  (setq org-directory "~/Documents/org")
+  ;; Org Roam config
+  (setq org-roam-directory "~/Documents/org/roam/"))
 
 #+end_src
-* Dired
-Here is some config to add some nice icons to Dired
-#+begin_src emacs-lisp :tangle yes
-(use-package! all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
-#+end_src
-
 * Which-key
 Configure which-key so that it comes out faster
 #+begin_src emacs-lisp :tangle yes
@@ -138,7 +111,7 @@ Config for mu4e
   (setq mu4e-use-maildirs-extension nil)
 
   ;; Referesh mail using isync every 10 minutes
-  ;; (setq mu4e-update-interval (* 10 60))
+  (setq mu4e-update-interval (* 10 60))
   (setq mu4e-get-mail-command "mailsync")
   (setq mu4e-maildir "~/.local/share/mail")
 
@@ -231,7 +204,7 @@ Automatically update all programs with 'Yay -Syu'
   (defun yay-update ()
     "Run the Yay shell command to automatically update the system on arch"
     (interactive)
-    (with-editor-async-shell-command "yay -Syu"))
+    (async-shell-command "yay -Syu"))
 
 (map! :leader :desc "Update System" "C-u" #'yay-update)
 #+end_src
