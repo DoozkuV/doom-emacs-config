@@ -15,16 +15,33 @@
 
 (setq doom-theme 'doom-gruvbox)
 
-(set-frame-parameter nil 'alpha-background 80)
-(add-to-list 'default-frame-alist '(alpha-background . 80))
+(defvar gp/background-opacity 75
+  "The default opacity of the background when the transparency
+  mode is toggled on."
+  )
 
-;; Shows the battery in modeline
-;; (display-battery-mode)
-;; (use-package! doom-modeline
-;;   :custom
-;;   (setq doom-modeline-battery t)
-;;   ;; (setq doom-modeline-mu4e nil)
-;;   )
+  ;;;###autoload
+(define-minor-mode gp/opacity-mode
+  "Enables background frame opacity"
+  :lighter " op"
+  :global t
+  (if gp/opacity-mode
+      ;; Turn on opacity by setting the alpha value of the current
+      ;; and all future frames
+      (progn
+        (set-frame-parameter nil 'alpha-background gp/background-opacity)
+        (add-to-list 'default-frame-alist `(alpha-background . ,gp/background-opacity))
+        )
+    ;; Turn off the opacity otherwise
+    (set-frame-parameter nil 'alpha-background 100)
+    (assq-delete-all 'alpha-background default-frame-alist)
+    ))
+
+(provide 'gp/opacity-mode)
+;; Automatically enable transparency at launch
+(gp/opacity-mode)
+
+(map! :leader :desc "Opacity Mode" "oo" #'gp/opacity-mode)
 
 ;; (use-package! projectile
 ;;   :init
@@ -157,3 +174,14 @@
     (async-shell-command "yay -Syu"))
 
 (map! :leader :desc "Update System" "C-u" #'yay-update)
+
+(use-package zoxide
+  :commands
+  (zoxide-find-file zoxide-find-file-with-query zoxide-travel zoxide-travel-with-query
+                    zoxide-cd zoxide-cd-with-query zoxide-add zoxide-remove zoxide-query
+                    zoxide-query-with zoxide-open-with)
+  :config
+  (add-hook 'find-file-hook 'zoxide-add))
+
+  (map! :leader :desc "Zoxide Find File" "z" #'zoxide-find-file)
+  (map! :leader :desc "Zoxide Find File" "Z" #'zoxide-travel)
