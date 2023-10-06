@@ -63,6 +63,9 @@
   (setq org-startup-folded t)
 
   (setq org-directory "~/Documents/org")
+
+  (setq org-agenda-files
+        `(,org-directory))
   ;; Org Roam config
   (setq org-roam-directory "~/Documents/org/roam/"))
 
