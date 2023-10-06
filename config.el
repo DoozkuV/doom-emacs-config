@@ -85,9 +85,9 @@
   (setq mu4e-use-maildirs-extension nil)
 
   ;; Referesh mail using isync every 10 minutes
-  (setq mu4e-update-interval (* 10 60))
-  (setq mu4e-get-mail-command "mailsync")
-  (setq mu4e-maildir "~/.local/share/mail")
+  (setq mu4e-update-interval nil ;(* 10 60)
+        mu4e-get-mail-command "mailsync"
+        mu4e-maildir "~/.local/share/mail")
 
   ;; Configure mail sending to use msmtp
   (setq sendmail-program (executable-find "msmtp")
@@ -119,8 +119,7 @@
                                            ("/georgenpadron@gmail.com/[Gmail]/Sent Mail" . ?s)
                                            ("/georgenpadron@gmail.com/[Gmail]/Trash" . ?t)
                                            ("/georgenpadron@gmail.com/[Gmail]/Drafts" . ?d)
-                                           ("/georgenpadron@gmail.com/[Gmail]/All Mail" . ?a)))
-                  ))
+                                           ("/georgenpadron@gmail.com/[Gmail]/All Mail" . ?a))))
 
          ;; Wealth Account
          (make-mu4e-context
