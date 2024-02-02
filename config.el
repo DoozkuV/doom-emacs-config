@@ -6,14 +6,26 @@
 ;; Make it so scroll margin is unset in popup buffers
 (setq-hook! '(+popup-mode-hook +popup-buffer-mode-hook) scroll-margin 0)
 
-(map! :i "C-j" #'next-line)
-(map! :i "C-k" #'previous-line)
-(map! :i "C-h" #'left-char)
-(map! :i "C-l" #'right-char)
+;; Set up auto-fill mode to work in other buffers
+(dolist (mode '(org-mode-hook
+		text-mode-hook))
+  (add-hook mode (lambda () (auto-fill-mode 1))))
+
+;; (map! :i "C-j" #'next-line)
+;; (map! :i "C-k" #'previous-line)
+;; (map! :i "C-h" #'left-char)
+;; (map! :i "C-l" #'right-char)
 
 (map! :leader :desc "Calculator" "oc" #'calc)
 
-(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-nova)
+
+;;; Font configuration
+;; Use the default system monospace font as the default emacs font
+;; This font defaults to Jetbrains Mono Nerd Font on this system
+(set-face-attribute 'default nil :font "monospace"  :height 110)
+
+(set-face-attribute 'fixed-pitch nil :font "monospace")
 
 (defvar gp/background-opacity 75
   "The default opacity of the background when the transparency
@@ -41,7 +53,7 @@
 ;; Automatically enable transparency at launch
 (gp/opacity-mode)
 
-(map! :leader :desc "Opacity Mode" "oo" #'gp/opacity-mode)
+(map! :leader :desc "Opacity Mode" "to" #'gp/opacity-mode)
 
 ;; (use-package! projectile
 ;;   :init
@@ -79,22 +91,31 @@
 (after! rustic
   (setq rustic-format-on-save t))
 
-(after! mu4e
+(use-package mu4e
+  ;; Mu is a package installed /outside/ of emacs
+  :ensure nil
+  :bind
+  ("C-c o m" . mu4e)
+  :config
   ;; This is set to 't' to avoid mail syncing issues when using mbsync
-  (setq mu4e-change-filenames-when-moving t)
-  (setq mu4e-use-maildirs-extension nil)
+  (setq mu4e-change-filenames-when-moving t
+        mu4e-use-maildirs-extension nil)
 
   ;; Referesh mail using isync every 10 minutes
-  (setq mu4e-update-interval nil ;(* 10 60)
-        mu4e-get-mail-command "mailsync"
+  ;; NOTE: This is disabled in this config as this is being handled instead
+  ;; by a bash script
+  (auth-source-pass-enable)
+  (setq mu4e-update-interval (* 10 60)
+        mu4e-get-mail-command "mbsync -a"
         mu4e-maildir "~/.local/share/mail")
 
-  ;; Configure mail sending to use msmtp
-  (setq sendmail-program (executable-find "msmtp")
-        send-mail-function #'smtpmail-send-it
-        message-sendmail-f-is-evil t
-        message-sendmail-extra-arguments '("--read-envelope-from")
-        message-send-mail-function #'message-send-mail-with-sendmail)
+  ;; Configuring SMTP to work properly with gmail
+  (setq message-send-mail-function 'smtpmail-send-it
+	starttls-use-gnutls t
+	smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
+	smtpmail-smtp-server "smtp.gmail.com"
+	smtpmail-default-smtp-server "smtp.gmail.com"
+	smtpmail-smtp-service 587)
 
   (setq mu4e-contexts
         (list
@@ -107,9 +128,6 @@
               (string-prefix-p "/georgenpadron@gmail.com" (mu4e-message-field msg :maildir))))
           :vars '((user-mail-address . "georgenpadron@gmail.com")
                   (user-full-name . "George N Padron")
-                  ;; (smtpmail-smtp-server . "smtp.gmail.com")
-                  ;; (smtpmail-smtp-service . 465)
-                  ;; (smtpmail-stream-type . ssl)
                   (mu4e-drafts-folder . "/georgenpadron@gmail.com/[Gmail]/Drafts")
                   (mu4e-sent-folder . "/georgenpadron@gmail.com/[Gmail]/Sent")
                   (mu4e-refile-folder . "/georgenpadron@gmail.com/[Gmail]/All Mail")
@@ -117,9 +135,11 @@
                   (mu4e-maildir-shortcuts .
                                           (("/georgenpadron@gmail.com/INBOX" . ?i)
                                            ("/georgenpadron@gmail.com/[Gmail]/Sent Mail" . ?s)
-                                           ("/georgenpadron@gmail.com/[Gmail]/Trash" . ?t)
+                                           ("/Georgenpadron@gmail.com/[Gmail]/Trash" . ?t)
                                            ("/georgenpadron@gmail.com/[Gmail]/Drafts" . ?d)
-                                           ("/georgenpadron@gmail.com/[Gmail]/All Mail" . ?a))))
+                                           ("/georgenpadron@gmail.com/[Gmail]/All Mail" . ?a)))
+		  (smtpmail-mail-address . "georgenpadron@gmail.com")
+		  (smtpmail-smtp-user . "georgenpadron@gmail.com")))
 
          ;; Wealth Account
          (make-mu4e-context
@@ -130,9 +150,6 @@
               (string-prefix-p "/wealth2005@gmail.com" (mu4e-message-field msg :maildir))))
           :vars '((user-mail-address . "wealth2005@gmail.com")
                   (user-full-name . "George N Padron")
-                  ;; (smtpmail-smtp-server . "smtp.gmail.com")
-                  ;; (smtpmail-smtp-service . 465)
-                  ;; (smtpmail-stream-type . ssl)
                   (mu4e-drafts-folder . "/wealth2005@gmail.com/[Gmail]/Drafts")
                   (mu4e-sent-folder . "/wealth2005@gmail.com/[Gmail]/Sent Mail")
                   (mu4e-refile-folder . "/wealth2005@gmail.com/[Gmail]/All Mail")
@@ -143,7 +160,9 @@
                                            ("/wealth2005@gmail.com/[Gmail]/Trash" . ?t)
                                            ("/wealth2005@gmail.com/[Gmail]/Drafts" . ?d)
                                            ("/wealth2005@gmail.com/[Gmail]/All Mail" . ?a)))
-                  ))
+		  (smtpmail-mail-address . "wealth2005@gmail.com")
+		  (smtpmail-smtp-user . "wealth2005@gmail.com")))
+
          ;; george.n.padron@vanderbilt.edu Account
          (make-mu4e-context
           :name "Vanderbilt"
@@ -166,9 +185,8 @@
                                            ("/george.n.padron@vanderbilt.edu/[Gmail]/Trash" . ?t)
                                            ("/george.n.padron@vanderbilt.edu/[Gmail]/Drafts" . ?d)
                                            ("/george.n.padron@vanderbilt.edu/[Gmail]/All Mail" . ?a)))
-                  ))
-         ))
-  )
+		  (smtpmail-mail-address . "george.n.padron@vanderbilt.edu")
+		  (smtpmail-smtp-user . "george.n.padron@vanderbilt.edu"))))))
 
 (defun yay-update ()
     "Run the Yay shell command to automatically update the system on arch"
